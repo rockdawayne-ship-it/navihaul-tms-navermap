@@ -1,6 +1,6 @@
 # NaviHaul 차량 운송 관제 TMS — PRD부터 실행·배포까지 E2E 매뉴얼 (교육생용)
 
-> 대상: 한국물류진흥재단 물류AX과정 수강생 (코딩 경험 없어도 됨)
+> 대상: AI LEX 3기 물류 AX과정 수강생 (코딩 경험 없어도 됨)
 > 도구: Claude Code + Python 3.13 + NAVER Cloud Platform Maps
 > 소요 시간: 약 3~4시간 (PRD 40분 · 키 발급 15분 · 구현 90분 · 검증 30분 · 배포 15분)
 > 완성 예시: https://github.com/rockdawayne-ship-it/navihaul-tms-navermap
@@ -733,4 +733,4 @@ NCP 키 발급은 Claude in Chrome 확장으로 콘솔 화면을 조작해 진�
 
 ---
 
-문의: 한국물류진흥재단 물류AX과정 / 강사 천동암
+문의: AI LEX 3기 물류 AX과정 / 천동암 교수

@@ -58,7 +58,7 @@ START_TXT = """NaviHaul 차량 운송 관제 TMS — 교육생 배포본
 
 매뉴얼: docs\\E2E_매뉴얼_교육생용.html (브라우저로 열기)
 설계 문서: PRD\\
-원본 저장소: https://github.com/rockdawayne-ship-it/navihaul-tms-navermap
+원본 저장소: https://github.com/rockdawayne-ship-it/navihaul-tms-navermap`n문의: AI LEX 3기 물류 AX과정 / 천동암 교수
 
 주의
 - .env 는 절대 공유·업로드 금지 (키 노출 시 NCP 콘솔에서 재발급)
