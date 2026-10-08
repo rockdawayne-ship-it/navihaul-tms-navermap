@@ -24,3 +24,8 @@ py -3.13 -m pytest -q
 
 ## 문서
 `PRD/` — 01 PRD · 02 데이터 모델 · 03 단계 · 04 프로젝트 스펙 · 05 네이버 지도 설정 가이드
+
+## 교육생 매뉴얼
+- [E2E 매뉴얼 (Markdown)](docs/E2E_매뉴얼_교육생용.md)
+- [E2E 매뉴얼 (HTML, 스크린샷 내장 단일 파일)](docs/E2E_매뉴얼_교육생용.html) — 앱 실행 중이면 http://localhost:8520/docs-manual/E2E_매뉴얼_교육생용.html
+

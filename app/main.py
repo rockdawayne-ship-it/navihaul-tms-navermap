@@ -160,3 +160,5 @@ def index():
 
 
 app.mount("/static", StaticFiles(directory=config.STATIC_DIR), name="static")
+if (config.ROOT / "docs").exists():
+    app.mount("/docs-manual", StaticFiles(directory=config.ROOT / "docs"), name="docs")
