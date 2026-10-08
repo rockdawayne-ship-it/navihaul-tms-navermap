@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NaviHaul TMS</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand">🚛 NaviHaul <span>차량 운송 관제 TMS · 네이버 지도</span></div>
+  <div class="badges" id="badges"></div>
+  <div class="actions">
+    <label>시뮬 <input id="simMin" type="number" value="15" min="1" max="240" style="width:56px"> 분</label>
+    <button id="btnTick">▶ 진행</button>
+    <button id="btnAuto">⏵ 자동</button>
+    <button id="btnReset" class="ghost">샘플 초기화</button>
+  </div>
+</header>
+
+<section class="kpi" id="kpi"></section>
+
+<main class="layout">
+  <aside class="side">
+    <nav class="tabs">
+      <button data-tab="orders" class="active">오더</button>
+      <button data-tab="new">오더 등록</button>
+      <button data-tab="vehicles">차량</button>
+    </nav>
+
+    <div class="tab" id="tab-orders">
+      <div class="filters" id="statusFilters"></div>
+      <ul class="list" id="orderList"></ul>
+    </div>
+
+    <div class="tab hidden" id="tab-new">
+      <form id="orderForm">
+        <label>화주 <select name="shipper_id" id="shipperSel"></select></label>
+        <fieldset>
+          <legend>상차지</legend>
+          <div class="search"><input id="originQ" placeholder="장소·주소 검색 (예: 평택항)"><button type="button" data-side="origin">검색</button></div>
+          <ul class="results" id="originResults"></ul>
+          <div class="picked" id="originPicked">미선택 (지도에서 우클릭 → 상차지 지정 가능)</div>
+        </fieldset>
+        <fieldset>
+          <legend>하차지</legend>
+          <div class="search"><input id="destQ" placeholder="장소·주소 검색 (예: 부산신항)"><button type="button" data-side="dest">검색</button></div>
+          <ul class="results" id="destResults"></ul>
+          <div class="picked" id="destPicked">미선택</div>
+        </fieldset>
+        <div class="row">
+          <label>차종 <select name="vehicle_type"><option value="CARGO">카고</option><option value="WING">윙바디</option><option value="BOX">탑차</option><option value="REEFER">냉장냉동</option></select></label>
+          <label>중량(t) <input name="weight_ton" type="number" step="0.5" min="0.5" value="5"></label>
+        </div>
+        <div class="row">
+          <label>상차 희망 <input name="pickup_at" type="datetime-local"></label>
+          <label>도착 약속 <input name="due_at" type="datetime-local"></label>
+        </div>
+        <label>품목 <input name="cargo_desc" placeholder="팔레트 10 (생활용품)"></label>
+        <button type="submit" class="primary">경로 계산 + 등록</button>
+        <div class="msg" id="formMsg"></div>
+      </form>
+    </div>
+
+    <div class="tab hidden" id="tab-vehicles">
+      <ul class="list" id="vehicleList"></ul>
+    </div>
+  </aside>
+
+  <section class="mapwrap">
+    <div id="map"></div>
+    <div id="mapFallback" class="hidden"></div>
+    <div class="legend">
+      <span><i class="dot idle"></i>공차</span><span><i class="dot assigned"></i>배차</span><span><i class="dot trip"></i>운행</span>
+      <span><i class="pin org"></i>상차</span><span><i class="pin dst"></i>하차</span>
+    </div>
+  </section>
+
+  <aside class="detail" id="detail"><div class="empty">오더를 선택하면 상세·추천·경로가 표시됩니다.</div></aside>
+</main>
+
+<div id="toast"></div>
+<script src="/static/app.js"></script>
+</body>
+</html>
