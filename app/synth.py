@@ -41,6 +41,13 @@ EMPTY_SPEED_KMH = 60.0
 ASSIGN_LEAD_H = 2.0  # 상차 희망 N시간 전부터 배정 시도
 
 
+_ORDER_SEED = 0
+
+
+def _order_seed(_rng) -> int:
+    return _ORDER_SEED
+
+
 def _pick(rng, weighted):
     r, acc = rng.random(), 0.0
     for v, w in weighted:
@@ -72,6 +79,8 @@ def generate(conn, n_vehicles: int, n_orders: int, days: int, start: datetime, r
             "INSERT INTO vehicles (plate, vehicle_type, capacity_ton, driver_name, driver_phone, status, lat, lng, home_label, updated_at) VALUES (?,?,?,?,?,'IDLE',?,?,?,?)",
             (plate, vtype, cap, rng.choice(SURNAMES) + rng.choice(GIVEN), f"010-{rng.randint(1000,9999)}-{rng.randint(1000,9999)}", lat, lng, home, ts))
     api_calls = 0
+    # 오더는 별도 난수열 → 차량 수를 바꿔도 같은 seed 면 같은 오더 200건 (시나리오 비교용)
+    rng = random.Random(rng.random() * 0 + _order_seed(rng))
     for i in range(n_orders):
         vtype = _pick(rng, VTYPE_W)
         ton = rng.choice(TON_BY_TYPE[vtype])
@@ -282,8 +291,10 @@ def main() -> None:
     ap.add_argument("--out", default=None)
     a = ap.parse_args()
 
+    global _ORDER_SEED
+    _ORDER_SEED = a.seed * 1000 + 1
     rng = random.Random(a.seed)
-    start = datetime.fromisoformat(a.start) if a.start else datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    start =datetime.fromisoformat(a.start) if a.start else datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
     end = start + timedelta(days=a.days, hours=12)  # 마지막 날 오더가 도착할 여유
     use_api = (not a.no_api) and config.features()["directions"]
     print(f"generate: vehicles={a.vehicles} orders={a.orders} days={a.days} api={'Directions5' if use_api else 'fallback'}")
