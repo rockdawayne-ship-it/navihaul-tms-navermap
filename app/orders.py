@@ -24,8 +24,9 @@ class TransitionError(Exception):
     pass
 
 
-def now_iso() -> str:
-    return datetime.now().replace(microsecond=0).isoformat()
+def now_iso(now: datetime | None = None) -> str:
+    """현재 시각 ISO 문자열. 시뮬레이션에서는 가상 시계를 `now` 로 넘긴다."""
+    return (now or datetime.now()).replace(microsecond=0).isoformat()
 
 
 def next_order_no(conn) -> str:
@@ -102,14 +103,14 @@ def recommend(conn, oid: int) -> dict:
     return dispatch.recommend(o, vehicles, trip_counts(conn))
 
 
-def _transition(conn, o: dict, to: str, note: str = "") -> None:
+def _transition(conn, o: dict, to: str, note: str = "", now: datetime | None = None) -> None:
     if to not in ALLOWED.get(o["status"], set()):
         raise TransitionError(f"{STATUS_KO.get(o['status'])} → {STATUS_KO.get(to, to)} 전이 불가")
     conn.execute("INSERT INTO order_events (order_id, from_status, to_status, note, at) VALUES (?,?,?,?,?)",
-                 (o["id"], o["status"], to, note, now_iso()))
+                 (o["id"], o["status"], to, note, now_iso(now)))
 
 
-def assign(conn, oid: int, vehicle_id: int, note: str = "") -> dict:
+def assign(conn, oid: int, vehicle_id: int, note: str = "", now: datetime | None = None) -> dict:
     o = get_order(conn, oid)
     if not o:
         raise KeyError("order not found")
@@ -119,28 +120,28 @@ def assign(conn, oid: int, vehicle_id: int, note: str = "") -> dict:
     ok, reason = dispatch.eligible(o, v)
     if not ok:
         raise TransitionError(f"배정 불가: {reason}")
-    _transition(conn, o, "ASSIGNED", note or f"{v['plate']} 배정")
+    _transition(conn, o, "ASSIGNED", note or f"{v['plate']} 배정", now)
     empty_km = round(geo.haversine_km(v["lat"], v["lng"], o["origin_lat"], o["origin_lng"]) * geo.ROAD_FACTOR, 1)
-    ts = now_iso()
+    ts = now_iso(now)
     conn.execute("UPDATE orders SET status='ASSIGNED', vehicle_id=?, empty_km=?, assigned_at=? WHERE id=?",
                  (vehicle_id, empty_km, ts, oid))
     conn.execute("UPDATE vehicles SET status='ASSIGNED', updated_at=? WHERE id=?", (ts, vehicle_id))
     return get_order(conn, oid)
 
 
-def change_status(conn, oid: int, to: str, note: str = "") -> dict:
+def change_status(conn, oid: int, to: str, note: str = "", now: datetime | None = None) -> dict:
     o = get_order(conn, oid)
     if not o:
         raise KeyError("order not found")
-    _transition(conn, o, to, note)
-    ts = now_iso()
+    _transition(conn, o, to, note, now)
+    ts = now_iso(now)
     vid = o["vehicle_id"]
     if to == "LOADED":
         conn.execute("UPDATE orders SET status='LOADED', loaded_at=?, progress=0 WHERE id=?", (ts, oid))
         conn.execute("UPDATE vehicles SET status='ON_TRIP', lat=?, lng=?, updated_at=? WHERE id=?",
                      (o["origin_lat"], o["origin_lng"], ts, vid))
     elif to == "IN_TRANSIT":
-        eta = (datetime.now() + timedelta(minutes=o["duration_min"] or 0)).replace(microsecond=0).isoformat()
+        eta = ((now or datetime.now()) + timedelta(minutes=o["duration_min"] or 0)).replace(microsecond=0).isoformat()
         conn.execute("UPDATE orders SET status='IN_TRANSIT', departed_at=?, eta=?, progress=0 WHERE id=?", (ts, eta, oid))
     elif to == "DELIVERED":
         conn.execute("UPDATE orders SET status='DELIVERED', delivered_at=?, progress=1, eta=? WHERE id=?", (ts, ts, oid))
